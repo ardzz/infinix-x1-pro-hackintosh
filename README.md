@@ -12,9 +12,9 @@ A Hackintosh project for the Infinix X1 PRO 13" built on top of the [OpenCore](h
 
 <h3>macOS Version Supported:</h3>
 Ventura latest version (I only tested for ventura, but it should work for other versions too. Just change the `.kext` files according to your version)
-<img alt="ventura-information.png" src="assets/ventura-information.png"/>
+![ventura-information.png](assets/ventura-information.png)
 Eligible for beta tester (Which means you can do OTA update)
-<img alt="beta-tester.png" src="assets/beta-tester.png"/>
+![beta-tester.png](assets/beta-tester.png)
 
 <h3>Hardware Information</h3>
 
