@@ -3,7 +3,7 @@
 <br>
 <p align="center">
   <img
-      src="https://raw.githubusercontent.com/ardzz/infinix-x1-pro-hackintosh/main/assets/laptop.png"
+      src="assets/laptop.png"
       alt="x1 pro"
       class="center"
       width=500px>
@@ -75,7 +75,9 @@ Eligible for beta tester (Which means you can do OTA update)
     <tr>
       <td>Built-in Trackpad</td>
       <td style="text-align: center;">✅</td>
-      <td>Fully supported (GPIO pinned with multi-touch gestures)</td>
+      <td>Fully supported (GPIO pinned with multi-touch gestures)
+<img src="assets/trackpad.png">
+</td>
     </tr>
     <tr>
     </tr>
@@ -109,7 +111,10 @@ Eligible for beta tester (Which means you can do OTA update)
       <td>Wi-Fi</td>
       <td rowspan=2>Intel AX201<br>(Wi-Fi 6 + Bluetooth 5.0)</td>
       <td rowspan=2 style="text-align: center;">✅</td>
-      <td rowspan=2>Fully supported (with limited Continuity support).</td>
+      <td rowspan=2>Fully supported (with limited Continuity support).
+<img src="assets/wifi.png">
+<img src="assets/bluetooth.png">
+</td>
     </tr>
     <tr>
       <td>Bluetooth</td>
@@ -184,18 +189,18 @@ Eligible for beta tester (Which means you can do OTA update)
     </tr>
     <tr>
       <td>Continuity Camera</td>
+      <td style="text-align: center;">✅</td>
+      <td>Supported.</td>
+    </tr>
+    <tr>
+      <td>Universal Clipboard</td>
       <td style="text-align: center;">❌</td>
       <td>Untested.</td>
     </tr>
     <tr>
-      <td>Universal Clipboard</td>
-      <td style="text-align: center;">✅</td>
-      <td>Supported.</td>
-    </tr>
-    <tr>
       <td>Universal Control</td>
-      <td style="text-align: center;">✅</td>
-      <td>Supported.</td>
+      <td style="text-align: center;">❌</td>
+      <td>Untested.</td>
     </tr>
   <!-- Sleep + Wake -->
     <tr>
@@ -216,4 +221,3 @@ Eligible for beta tester (Which means you can do OTA update)
       <td>Fully supported.</td>
     </tr>
 </table>
-
