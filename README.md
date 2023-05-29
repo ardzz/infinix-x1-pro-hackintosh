@@ -241,7 +241,7 @@ If those settings are not available in your BIOS, skip them and continue the ins
 ### Create USB Installer
 1. Download macOS Ventura from https://068fx-my.sharepoint.com/:f:/g/personal/ekopuryanto_068fx_onmicrosoft_com/EpzotHNX6yJOlCE-DJcATFMByyNJgirB_c5Ix7PGu1Fguw?e=0SB6Tv (Thanks for hackintosh lover Indonesia for providing the installer)
 2. Download from this repository
-3. Download flasher, you can use [Balena Etcher](https://www.balena.io/etcher/)
+3. Download flasher, you can use [Balena Etcher](https://www.balena.io/etcher/) or [TransMac](https://www.acutesystems.com/scrtm.htm)
 4. Flash the macOS Ventura to your USB Drive
 5. Mount the EFI partition of the USB Drive
 6. Copy the EFI folder from this repository to the EFI partition of the USB Drive
@@ -253,8 +253,19 @@ If those settings are not available in your BIOS, skip them and continue the ins
 12. Copy the EFI folder from the EFI partition of the USB Drive to the EFI partition of your SSD
 13. Reboot and enjoy
 
+### Dual booting with Windows
+1. Install macOS Ventura first
+2. Backup your EFI folder
+3. Install Windows
+4. Boot from the USB Drive
+5. Copy the EFI folder from the EFI partition of the USB Drive to the EFI partition of your SSD (if popup shows up, click replace)
+6. Reboot and enjoy
+
 ### ⚠️ NOTE ⚠️
 This EFI is not recommended for daily use, because it's still in development stage. If you want to use it for daily use, you can use it at your own risk.
 I'm not responsible for any damage caused by this EFI.
 
 Also, remove the ACPI named [SSDT-RP09.PXSX-disable.aml](EFI%2FOC%2FACPI%2FSSDT-RP09.PXSX-disable.aml) because my 1st nvme slot are broken and caused kernel panic
+
+If not, you can do dual booting with Windows by following the guide above.
+<img alt="fuck_windows.jpg" src="assets/fuck_windows.jpg"/>
