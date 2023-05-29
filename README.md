@@ -267,5 +267,5 @@ I'm not responsible for any damage caused by this EFI.
 
 Also, remove the ACPI named [SSDT-RP09.PXSX-disable.aml](EFI%2FOC%2FACPI%2FSSDT-RP09.PXSX-disable.aml) because my 1st nvme slot are broken and caused kernel panic
 
-If not, you can do dual booting with Windows by following the guide above.
+If not, you can't do dual booting with Windows by following the guide above.
 <img alt="fuck_windows.jpg" src="assets/fuck_windows.jpg"/>
