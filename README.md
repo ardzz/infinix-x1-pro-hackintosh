@@ -241,11 +241,11 @@ If those settings are not available in your BIOS, skip them and continue the ins
 ### Create USB Installer
 1. Download macOS Ventura from https://068fx-my.sharepoint.com/:f:/g/personal/ekopuryanto_068fx_onmicrosoft_com/EpzotHNX6yJOlCE-DJcATFMByyNJgirB_c5Ix7PGu1Fguw?e=0SB6Tv (Thanks for hackintosh lover Indonesia for providing the installer)
 2. Download from this repository
-3. Download flasher, you can use [Balena Etcher](https://www.balena.io/etcher/) or [TransMac](https://www.acutesystems.com/scrtm.htm)
+3. Download flasher, you can use [Balena Etcher](https://www.balena.io/etcher/)
 4. Flash the macOS Ventura to your USB Drive
 5. Mount the EFI partition of the USB Drive
 6. Copy the EFI folder from this repository to the EFI partition of the USB Drive
-7. Generate your own SMBIOS by using [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS]
+7. Generate your own SMBIOS by using [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS)
 8. Copy the generated SMBIOS to the EFI partition of the USB Drive
 9. Boot from the USB Drive
 10. Install macOS Ventura
