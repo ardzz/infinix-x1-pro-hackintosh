@@ -12,11 +12,47 @@ A Hackintosh project for the Infinix X1 PRO 14" built on top of the [OpenCore](h
 
 <h3>macOS Version Supported:</h3>
 
-Ventura latest version (I only tested for ventura, but it should work for other versions too. Just change the `.kext` files according to your version)
+**✨ NEW: macOS Sequoia (15.x) Support Added!**
+
+This EFI now supports **macOS Ventura, Sonoma, and Sequoia** with automatic WiFi driver switching:
+- **Ventura/Sonoma (macOS 13-14)**: Uses AirportItlwm for native WiFi
+- **Sequoia (macOS 15+)**: Uses itlwm + HeliPort for WiFi management
+
+> **📌 Note for Sequoia users**: After installation, install [HeliPort](https://github.com/OpenIntelWireless/HeliPort/releases) for WiFi management, then re-enable SecureBootModel in config.plist for security.
 
 <img alt="ventura-information.png" src="assets/ventura-information.png"/>
 Eligible for beta tester (Which means you can do OTA update)
 <img alt="beta-tester.png" src="assets/beta-tester.png"/>
+
+<h3>🆕 What's New in This Update (December 2025)</h3>
+
+**Major Update: OpenCore 1.0.6 + Sequoia Support**
+
+| Component | Old Version | New Version | Notes |
+|-----------|-------------|-------------|-------|
+| **OpenCore** | 0.8.x | **1.0.6** | Latest stable release |
+| **Lilu** | 1.6.5 | **1.7.1** | Core patching engine |
+| **VirtualSMC** | 1.3.1 | **1.3.7** | SMC emulation |
+| **WhateverGreen** | 1.6.4 | **1.6.9** | Graphics patches |
+| **AppleALC** | 1.8.2 | **1.9.3** | Audio support |
+| **NVMeFix** | 1.1.0 | **1.1.3** | NVMe power management |
+| **IntelBluetooth** | 2.2.0 | **2.4.0** | Bluetooth support |
+| **BlueToolFixup** | 2.6.7 | **2.6.9** | Bluetooth patches |
+| **itlwm** | - | **2.3.0** | 🆕 NEW: WiFi for Sequoia |
+
+**Key Changes:**
+- ✅ Full macOS Sequoia (15.x) support
+- ✅ Automatic WiFi driver switching based on macOS version
+- ✅ OpenCore 1.0.6 compatibility updates
+- ✅ All kexts updated to latest stable versions
+- ✅ Passed ocvalidate with 0 errors
+
+**For Sequoia Users:**
+1. WiFi requires [HeliPort](https://github.com/OpenIntelWireless/HeliPort/releases) app (download after install)
+2. After successful boot, re-enable SecureBootModel in config.plist:
+   ```bash
+   sudo /usr/libexec/PlistBuddy -c "Set :Misc:Security:SecureBootModel Default" /Volumes/EFI/EFI/OC/config.plist
+   ```
 
 <h3>Hardware Information</h3>
 
@@ -110,7 +146,9 @@ Eligible for beta tester (Which means you can do OTA update)
       <td>Wi-Fi</td>
       <td rowspan=2>Intel AX201<br>(Wi-Fi 6 + Bluetooth 5.0)</td>
       <td rowspan=2 style="text-align: center;">✅</td>
-      <td rowspan=2>Fully supported (with limited Continuity support).
+      <td rowspan=2>Fully supported (with limited Continuity support).<br>
+      <strong>Ventura/Sonoma:</strong> AirportItlwm (native)<br>
+      <strong>Sequoia:</strong> itlwm + HeliPort app required
 <img src="assets/wifi.png">
 <img src="assets/bluetooth.png">
 </td>
