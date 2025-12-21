@@ -54,6 +54,38 @@ Eligible for beta tester (Which means you can do OTA update)
    sudo /usr/libexec/PlistBuddy -c "Set :Misc:Security:SecureBootModel Default" /Volumes/EFI/EFI/OC/config.plist
    ```
 
+---
+
+<h3>⚠️ Important: Generate Your Own Serial Numbers</h3>
+
+**The EFI contains template PlatformInfo values. You MUST generate your own before use!**
+
+| Field | Current Value | Status |
+|-------|---------------|--------|
+| SystemSerialNumber | `XXXXXXXXXXXXX` | ⚠️ Template - Replace |
+| MLB | `XXXXXXXXXXXXXXXXX` | ⚠️ Template - Replace |
+| SystemUUID | `XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` | ⚠️ Template - Replace |
+| ROM | `112233445566` | ⚠️ Template - Replace |
+
+**How to Generate:**
+
+1. Download [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS)
+2. Run it and select option `1` (Install/Update MacSerial)
+3. Select option `3` (Generate SMBIOS)
+4. Type: `MacBookPro16,2` (for Ice Lake)
+5. Copy the generated values to your config.plist:
+   - **Serial** → `PlatformInfo → Generic → SystemSerialNumber`
+   - **Board Serial** → `PlatformInfo → Generic → MLB`
+   - **SmUUID** → `PlatformInfo → Generic → SystemUUID`
+   - **ROM** → Use your actual MAC address or generate a random one
+
+**Verify your serial is unique:**
+- Check at: https://checkcoverage.apple.com/
+- Should show: "Unable to check coverage" or "Purchase Date not Validated" (good)
+- Should NOT show: "Valid Purchase Date" (already in use, generate a new one)
+
+---
+
 <h3>Hardware Information</h3>
 
 | Component        | Model                                      |
