@@ -1,340 +1,271 @@
-<h1 align="center"> Infinix X1 Pro Hackintosh</h1>
+<h1 align="center">Infinix INBook X1 Pro Hackintosh</h1>
 
-<br>
 <p align="center">
-  <img
-      src="assets/laptop.png"
-      alt="x1 pro"
-      class="center"
-      width=500px>
+  <img src="assets/laptop.png" alt="Infinix INBook X1 Pro" width="500px">
+</p>
 
-A Hackintosh project for the Infinix X1 PRO 14" built on top of the [OpenCore](https://github.com/acidanthera/OpenCorePkg) bootloader
+An [OpenCore](https://github.com/acidanthera/OpenCorePkg) EFI for the Infinix INBook X1 Pro 14" (i7-1065G7, Ice Lake).
 
-<h3>macOS Version Supported:</h3>
+**Current target: macOS Sequoia 15.8.3 (24H241)**, with working Wi-Fi, Bluetooth, AirDrop, audio, touchpad and display sleep.
+System sleep (S3) does **not** work yet; see [Sleep and power](#sleep-and-power).
 
-**✨ NEW: macOS Sequoia (15.x) Support Added!**
+> [!IMPORTANT]
+> The EFI ships with **template SMBIOS values**. Generate your own before you boot it.
+> See [Generate your own SMBIOS](#3-generate-your-own-smbios).
 
-This EFI now supports **macOS Ventura, Sonoma, and Sequoia** with automatic WiFi driver switching:
-- **Ventura/Sonoma (macOS 13-14)**: Uses AirportItlwm for native WiFi
-- **Sequoia (macOS 15+)**: Uses itlwm + HeliPort for WiFi management
+---
 
-> **📌 Note for Sequoia users**: After installation, install [HeliPort](https://github.com/OpenIntelWireless/HeliPort/releases) for WiFi management, then re-enable SecureBootModel in config.plist for security.
+## Hardware
 
-<img alt="ventura-information.png" src="assets/ventura-information.png"/>
-Eligible for beta tester (Which means you can do OTA update)
-<img alt="beta-tester.png" src="assets/beta-tester.png"/>
+| Component | Model |
+|---|---|
+| CPU | Intel Core i7-1065G7 (Ice Lake) |
+| iGPU | Intel Iris Plus Graphics G7 (`8086:8a52`) |
+| Memory | 16 GB LPDDR4X |
+| Wi-Fi / Bluetooth | Intel AX201 CNVi (Bluetooth `8087:0026`) |
+| Touchpad | SYNA3602 (I2C) |
+| Audio | Realtek ALC269VB |
+| Storage | TEAM TM8FP6 512 GB NVMe (MAXIO MAP1202), ADATA Legend 710 NVMe |
 
-<h3>🆕 What's New in This Update (December 2025)</h3>
+## Software stack
 
-**Major Update: OpenCore 1.0.6 + Sequoia Support**
+| Component | Version | Notes |
+|---|---|---|
+| OpenCore | 1.0.8 (DEBUG build) | See [Debugging and boot speed](#debugging-and-boot-speed) |
+| Lilu | 1.7.2 | |
+| VirtualSMC (+ SMCBatteryManager, SMCProcessor, SMCSuperIO) | 1.3.8 | |
+| WhateverGreen | 1.7.1 | See [Graphics fix](#graphics-fix-ice-lake-screen-corruption) |
+| AppleALC | 1.9.8 | `alcid=16` |
+| VoodooPS2Controller | 2.3.7 | Keyboard |
+| VoodooI2C / VoodooI2CHID | **2.6.5** | 2.9.1 is included but disabled: it attaches, but the touchpad stays dead |
+| USBToolBox + UTBMap | 1.2.0 | Plug-tested map, `XhciPortLimit` off |
+| IntelBluetoothFirmware | 2.4.0 | |
+| BlueToolFixup | 2.7.2 | |
+| BTLEAdvFixup | 0.9.2 | Required for AirDrop with ForbiddenItlwm |
+| ForbiddenItlwm | 0.6.0-beta.1 (Sequoia build) | **Active** Wi-Fi driver (AirDrop capable) |
+| AirportItlwm (laobamac fork) | 2.4.0-alpha | Included, **disabled**. Used to install 15.5 |
+| itlwm | 2.3.0 | Included, **disabled** |
+| IntelBTPatcher | 2.4.0 | Included, **disabled**. Must stay off while BTLEAdvFixup is on |
 
-| Component | Old Version | New Version | Notes |
-|-----------|-------------|-------------|-------|
-| **OpenCore** | 0.8.x | **1.0.6** | Latest stable release |
-| **Lilu** | 1.6.5 | **1.7.1** | Core patching engine |
-| **VirtualSMC** | 1.3.1 | **1.3.7** | SMC emulation |
-| **WhateverGreen** | 1.6.4 | **1.6.9** | Graphics patches |
-| **AppleALC** | 1.8.2 | **1.9.3** | Audio support |
-| **NVMeFix** | 1.1.0 | **1.1.3** | NVMe power management |
-| **IntelBluetooth** | 2.2.0 | **2.4.0** | Bluetooth support |
-| **BlueToolFixup** | 2.6.7 | **2.6.9** | Bluetooth patches |
-| **itlwm** | - | **2.3.0** | 🆕 NEW: WiFi for Sequoia |
+SMBIOS: `MacBookAir9,1`. `SecureBootModel` is `Disabled`.
 
-**Key Changes:**
-- ✅ Full macOS Sequoia (15.x) support
-- ✅ Automatic WiFi driver switching based on macOS version
-- ✅ OpenCore 1.0.6 compatibility updates
-- ✅ All kexts updated to latest stable versions
-- ✅ Passed ocvalidate with 0 errors
+## What works
 
-**For Sequoia Users:**
-1. WiFi requires [HeliPort](https://github.com/OpenIntelWireless/HeliPort/releases) app (download after install)
-2. After successful boot, re-enable SecureBootModel in config.plist:
-   ```bash
-   sudo /usr/libexec/PlistBuddy -c "Set :Misc:Security:SecureBootModel Default" /Volumes/EFI/EFI/OC/config.plist
+| Feature | Status | Notes |
+|---|---|---|
+| Graphics acceleration (Iris Plus G7) | ✅ | Needs the framebuffer settings below |
+| Built-in display | ✅ | No corruption with the [graphics fix](#graphics-fix-ice-lake-screen-corruption) |
+| Display sleep | ✅ | Needs `-nodisplaysleepDC6` (already in boot-args) |
+| System sleep (S3) | ❌ | Wakes, but the panel stays black. See [Sleep and power](#sleep-and-power) |
+| Hibernation | ❌ | Resume hangs on a blue screen |
+| Keyboard | ✅ | VoodooPS2 |
+| Touchpad (SYNA3602) | ✅ | VoodooI2C 2.6.5 |
+| Speakers | ✅ | `alcid=16` |
+| Built-in microphone | ❓ | Not tested on Sequoia. It did not work on Ventura |
+| Wi-Fi (AX201) | ✅ | ForbiddenItlwm |
+| Bluetooth (AX201) | ✅ | IntelBluetoothFirmware + BlueToolFixup |
+| AirDrop | ✅ | Both directions with an iPhone 11 (iOS 27.0.1). See [AirDrop](#airdrop-forbiddenitlwm) |
+| iPhone Mirroring | ❌ | Needs a T2 Mac. Not possible on this hardware |
+| USB ports | ✅ | Plug-tested USB map (see [USB map](#usb-map)) |
+
+<img src="assets/trackpad.png" alt="Touchpad settings">
+
+---
+
+## Installation
+
+### 1. BIOS settings
+
+Disable:
+* Secure Boot
+* Wake on WLAN and Bluetooth (Chipset > PCH IO > disable wake on WLAN+BT)
+* VT-d (Advanced > CPU > Virtualization Technology)
+
+Enable / set, if your BIOS shows them:
+* `DVMT Pre-Allocated` to `64MB` or `MAX` (Advanced > System Agent (SA) Configuration > Graphics Configuration)
+* `DVMT Total Gfx Mem` to `MAX` (same menu)
+* Intel Virtualization Technology (Advanced > CPU Configuration)
+
+If a setting is not in your BIOS, skip it.
+
+### 2. Create the USB installer
+
+15.8.3 was installed with the **full installer** (`InstallAssistant.pkg` for 15.8.3 from Apple's software update CDN, `swcdn.apple.com`).
+
+1. On a Mac, run `InstallAssistant.pkg`. It puts *Install macOS Sequoia.app* in `/Applications`.
+2. Make the USB stick with `createinstallmedia`:
+   ```sh
+   sudo /Applications/Install\ macOS\ Sequoia.app/Contents/Resources/createinstallmedia --volume /Volumes/<USB>
    ```
+3. Mount the USB stick's EFI partition and copy this repository's `EFI` folder to it.
+
+Use the full installer for updates as well. Because `SecureBootModel` is `Disabled`, Software Update does not offer macOS updates.
+
+#### USB rescue variant
+
+For a USB stick that you keep as a rescue disk, change two keys in its copy of `config.plist`:
+
+| Key | Daily (this repo) | USB rescue |
+|---|---|---|
+| `Misc/Boot/LauncherOption` | `Full` | `Disabled` |
+| `Misc/Debug/Target` | `21` (`0x15`) | `67` (`0x43`) |
+
+`Disabled` stops the USB copy of OpenCore from registering itself in the firmware boot order. `0x43` adds on-screen and file logging, which is useful when the internal EFI fails, but slow (see below).
+
+### 3. Generate your own SMBIOS
+
+The published `config.plist` contains template values:
+
+| Field | Template value |
+|---|---|
+| `SystemSerialNumber` | `XXXXXXXXXXXXX` |
+| `MLB` | `XXXXXXXXXXXXXXXXX` |
+| `SystemUUID` | `XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` |
+| `ROM` | `112233445566` (ASCII placeholder) |
+
+Replace all four before you boot. An earlier revision of this repository published a real serial number, so **do not reuse any serial you find in this repository's history**. A serial that someone else also uses causes iCloud and iMessage problems for both of you.
+
+1. Get `macserial` from the [OpenCorePkg release](https://github.com/acidanthera/OpenCorePkg/releases) (`Utilities/macserial`) or use [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS).
+2. Generate values for **`MacBookAir9,1`** (the model in the config):
+   ```sh
+   ./macserial -m MacBookAir9,1 -n 1
+   ```
+   The output is `Serial | Board Serial`. Put them in `SystemSerialNumber` and `MLB`.
+3. Generate `SystemUUID` with `uuidgen`.
+4. Set `ROM` to 6 bytes of data, for example your Wi-Fi MAC address. With the template value, `ocvalidate` reports an error for `ROM` and `SystemUUID`; with real values it reports no issues.
+5. Check the serial at <https://checkcoverage.apple.com/>. "Unable to check coverage" is what you want. A valid purchase date means the serial is in use: generate another.
+
+### 4. Install macOS
+
+1. Boot the USB stick and install macOS.
+2. After the installer finishes, boot macOS from the USB stick again.
+3. Mount the internal ESP and copy the `EFI` folder to it:
+   ```sh
+   sudo diskutil mount disk0s1        # check `diskutil list` for your ESP
+   ```
+4. Reboot without the USB stick.
+
+With `LauncherOption` set to `Full`, OpenCore adds itself to the firmware boot menu and keeps itself first in the boot order on every boot, so a Windows update cannot replace it as the default.
+
+### Dual boot with Windows
+
+1. Install macOS first and back up your EFI folder.
+2. Install Windows.
+3. Copy the EFI folder back to the ESP. Replace files if asked.
 
 ---
 
-<h3>⚠️ Important: Generate Your Own Serial Numbers</h3>
+## AirDrop (ForbiddenItlwm)
 
-**The EFI contains template PlatformInfo values. You MUST generate your own before use!**
+AirDrop works in both directions with an iPhone 11 on 15.8.3. On the Mac, `ioreg` shows `ItlwmAWDLBuildCheck=verified`, `awdl0` is up, and AWDL uses channel 149.
 
-| Field | Current Value | Status |
-|-------|---------------|--------|
-| SystemSerialNumber | `XXXXXXXXXXXXX` | ⚠️ Template - Replace |
-| MLB | `XXXXXXXXXXXXXXXXX` | ⚠️ Template - Replace |
-| SystemUUID | `XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` | ⚠️ Template - Replace |
-| ROM | `112233445566` | ⚠️ Template - Replace |
+The AirDrop setup is:
+* `ForbiddenItlwm.kext` and `BTLEAdvFixup.kext` enabled.
+* `AirportItlwm.kext`, `itlwm.kext` and `IntelBTPatcher.kext` disabled. IntelBTPatcher must stay off while BTLEAdvFixup is on.
+* The ForbiddenItlwm AWDL flags in `boot-args` (`-btleadv -itlawdlcoexprobe … itlawdltxqueue=4096`).
 
-**How to Generate:**
+> [!WARNING]
+> ForbiddenItlwm enables AirDrop only on builds **24H23, 24H32, 24H232 and 24H241** (15.8 to 15.8.3).
+> Before a macOS update, switch back to plain Wi-Fi:
+> ```sh
+> sudo bash tools/airdrop-mode.sh off /Volumes/EFI/EFI/OC/config.plist
+> ```
+> Update, check that ForbiddenItlwm supports the new build, then run `airdrop-mode.sh on`.
 
-1. Download [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS)
-2. Run it and select option `1` (Install/Update MacSerial)
-3. Select option `3` (Generate SMBIOS)
-4. Type: `MacBookPro16,2` (for Ice Lake)
-5. Copy the generated values to your config.plist:
-   - **Serial** → `PlatformInfo → Generic → SystemSerialNumber`
-   - **Board Serial** → `PlatformInfo → Generic → MLB`
-   - **SmUUID** → `PlatformInfo → Generic → SystemUUID`
-   - **ROM** → Use your actual MAC address or generate a random one
+`airdrop-mode.sh off` enables AirportItlwm and IntelBTPatcher and removes the AWDL flags. `on` does the opposite. The script saves a `.bak` copy of the config first.
 
-**Verify your serial is unique:**
-- Check at: https://checkcoverage.apple.com/
-- Should show: "Unable to check coverage" or "Purchase Date not Validated" (good)
-- Should NOT show: "Valid Purchase Date" (already in use, generate a new one)
+Check AirDrop after a reboot:
+```sh
+ioreg -l -w0 | grep -E '"ItlwmAWDL(InterfaceBuild|BuildCheck)"|"ITLAWDLCoex(Added|Channel|CountryLearned)"'
+```
+
+## Graphics fix (Ice Lake screen corruption)
+
+With the old framebuffer the screen showed tiled corruption. The kernel log showed `Display Pipe Underrun` and `Failed to distribute DBufs`. Two `DeviceProperties` for `PciRoot(0x0)/Pci(0x2,0x0)` fix it:
+
+| Property | Value |
+|---|---|
+| `AAPL,ig-platform-id` | `0000528A` (`0x8A520000`) |
+| `dbuf-optimizer-delay` | `02000000` (2 seconds) |
+
+Do not use these platform IDs on this laptop:
+* `0x8A5C0001`: screen corruption.
+* `0x8A510002`: screen corruption, and the cursor and touchpad stop working.
+
+`tools/gfx-test.sh` applies one graphics change at a time against a saved baseline. Use it if you need to test other values.
+
+## Sleep and power
+
+* **Display sleep works** with `-nodisplaysleepDC6`. Without it, the panel does not come back (`[PANEL] Timeout waiting for HPD`, AUX `HPD is low`).
+* **System sleep (S3) is broken.** The system wakes, but eDP HPD stays low, link training phase 1 fails and the display stays black.
+* **Hibernation does not work.** With `hibernatemode 25` and OpenCore `HibernateMode` set to `NVRAM` or `Auto`, there is no hibernation marker and resume hangs on a blue screen.
+
+Until S3 is fixed, disable system sleep and keep display sleep:
+```sh
+sudo bash tools/nosleep.sh /Volumes/EFI/EFI/OC/config.plist
+```
+This sets `displaysleep 10`, `sleep 0`, `disablesleep 1`, turns hibernation off, and sets OpenCore `HibernateMode` to `None`.
+
+## Boot arguments
+
+```
+-v keepsyms=1 swd_panic=1 -igfxcdc -igfxdvmt igfxonln=1 -igfxblr igfxfw=2 -igfxdbeo -wegnoegpu agdpmod=vit9696 -noDC9 debug=0x100 forceRenderStandby=0 alcid=16 -nodisplaysleepDC6
+```
+plus the ForbiddenItlwm AWDL flags (`-btleadv … itlawdltxqueue=4096`).
+
+`-v` (verbose boot) and `debug=0x100` are there for debugging. Remove them for daily use.
+
+## Debugging and boot speed
+
+The EFI uses the OpenCore **DEBUG** build. `Misc/Debug/Target` is `0x15` (logging enabled, to DataHub and a UEFI variable, no file). With this target OpenCore reaches `boot.efi` in about 3 seconds.
+
+`Target` `0x43` adds on-screen logging and writes a log file to the ESP. That is useful when the system does not boot, but on a USB stick it made the OpenCore stage take about 4 minutes. Use it only on the rescue USB.
+
+## USB map
+
+`UTBMap.kext` (USBToolBox) was built from a plug test of every port:
+
+| Port | Use |
+|---|---|
+| HS01, HS02 | USB-C |
+| HS04, HS06, HS07 | USB-A |
+| HS03 | Webcam |
+| HS05 | Card reader |
+| HS10 | Bluetooth |
+
+`XhciPortLimit` is off. To rebuild the map, run `tools/watch-ports.sh` under Linux while you plug devices into each port, edit `tools/build_utbmap.py` and run it.
+
+## Touchpad
+
+The published config uses VoodooI2C/VoodooI2CHID **2.6.5** with the stock DSDT `GpioInt`. VoodooI2C 2.9.1 is included but disabled: it attaches on 15.8.3, but the touchpad does not respond.
+
+`tools/touchpad-mode.sh` switches between the 2.6.5 set (`v265`), 2.9.1 (`native`), and two disabled fallback SSDTs (`SSDT-TPD0-GPIO`, `SSDT-TPD0-POLL`, plus `SSDT-GPI0`).
+
+## Tools
+
+All shell scripts in [`tools/`](tools) change `config.plist` on a mounted ESP. Run them on macOS with `sudo`. Each script describes its usage in its header.
+
+| Script | Purpose |
+|---|---|
+| `airdrop-mode.sh on\|off <config>` | Switch between ForbiddenItlwm (AirDrop) and AirportItlwm (plain Wi-Fi) |
+| `nosleep.sh <config>` | Display-sleep-only power policy |
+| `gfx-test.sh <step> <config>` | One-change-at-a-time iGPU experiments |
+| `touchpad-mode.sh <mode> <config>` | Switch the VoodooI2C version and touchpad SSDTs |
+| `watch-ports.sh` | USB port watcher (runs under **Linux**) |
+| `build_utbmap.py` | Generate `UTBMap.kext` (any OS, Python 3) |
 
 ---
 
-<h3>Hardware Information</h3>
+## Credits
 
-| Component        | Model                                      |
-|------------------|--------------------------------------------|
-| Processor        | Intel(R) Core(TM) i7-1065G7 CPU @ 1.30GHz  |
-| Memory           | 16GB LPDDR4X 3200MHz                       |
-| Storage          | TEAM TM8FP6 512GB NVMe SSD                 |
-| Graphics         | Intel Iris Plus Graphics G7                |
-| Audio            | Realtek ALC269 (alcid = 18)                |
-| Wifi & Bluetooth | Intel AX201                                |
+* [acidanthera](https://github.com/acidanthera): OpenCore, Lilu, VirtualSMC, WhateverGreen, AppleALC, VoodooPS2, BrightnessKeys, NVMeFix, BlueToolFixup
+* [OpenIntelWireless](https://github.com/OpenIntelWireless): itlwm, IntelBluetoothFirmware
+* [laobamac/itlwm](https://github.com/laobamac/itlwm): AirportItlwm for Sequoia
+* [retropineaple/ForbiddenItlwm](https://github.com/retropineaple/ForbiddenItlwm): AirDrop-capable itlwm and BTLEAdvFixup
+* [VoodooI2C](https://github.com/VoodooI2C/VoodooI2C): I2C touchpad
+* [USBToolBox](https://github.com/USBToolBox/kext): USB mapping
+* [Dortania](https://dortania.github.io/OpenCore-Install-Guide/): OpenCore install guides
 
-<h3>What's working</h3>
-<table>
-  <thead>
-    <tr>
-      <th>Component</th>
-      <th>Device</th>
-      <th colspan=2>Status</th>
-    </tr>
-  </thead>
-  <tbody>
-  <!-- Processor -->
-    <tr>
-      <td>CPU</td>
-      <td>Intel(R) Core(TM) i7-1065G7 CPU @ 1.30GHz<br>
-      <td style="text-align: center;">✅</td>
-      <td>Natively supported (since macOS Catalina).</td>
-    </tr>
-  <!-- Graphics -->
-    <tr>
-      <td rowspan=2>Graphics</td>
-      <td>Intel Iris Plus Graphics G7 (Ice Lake)</td>
-      <td style="text-align: center;">✅</td>
-      <td>Full acceleration (QE/CI)</td>
-    </tr>
-    <tr>
-    </tr>
-  <!-- Displays -->
-    <tr>
-      <td rowspan=2>Displays</td>
-      <td>13,9-inch (1920 × 1080)<br>(IPS 60 Hz)</td>
-      <td style="text-align: center;">✅</td>
-      <td>Fully supported (with backlight control).</td>
-    </tr>
-    <tr>
-    </tr>
-  <!-- Interfaces -->
-    <tr>
-      <td rowspan=6>Interfaces</td>
-      <td>Built-in Keyboard</td>
-      <td style="text-align: center;">✅</td>
-      <td>Fully supported (with media keys and backlight control).</td>
-    </tr>
-    <tr>
-      <td>Built-in Trackpad</td>
-      <td style="text-align: center;">✅</td>
-      <td>Fully supported (GPIO pinned with multi-touch gestures)
-<img src="assets/trackpad.png">
-</td>
-    </tr>
-    <tr>
-    </tr>
-    <tr>
-    </tr>
-    <tr>
-<tr>
-</tr>
-    </tr>
-  <!-- Audio -->
-    <tr>
-      <td rowspan=2>Audio<br>(Realtek ALC269)</td>
-      <td>Built-in speakers</td>
-      <td style="text-align: center;">✅</td>
-      <td>Fully supported (with volume control).</td>
-    </tr>
-    <tr>
-      <td>Built-in microphone</td>
-      <td style="text-align: center;">❌</td>
-      <td>Not supported (probably wrong alcid)</td>
-    </tr>
-  <!-- Camera -->
-    <tr>
-      <td>Camera</td>
-      <td>MTD Camera</td>
-      <td style="text-align: center;">✅</td>
-      <td>Fully supported</td>
-    </tr>
-  <!-- Wi-Fi + Bluetooth -->
-    <tr>
-      <td>Wi-Fi</td>
-      <td rowspan=2>Intel AX201<br>(Wi-Fi 6 + Bluetooth 5.0)</td>
-      <td rowspan=2 style="text-align: center;">✅</td>
-      <td rowspan=2>Fully supported (with limited Continuity support).<br>
-      <strong>Ventura/Sonoma:</strong> AirportItlwm (native)<br>
-      <strong>Sequoia:</strong> itlwm + HeliPort app required
-<img src="assets/wifi.png">
-<img src="assets/bluetooth.png">
-</td>
-    </tr>
-    <tr>
-      <td>Bluetooth</td>
-    </tr>
-  <!-- Storage -->
-    <tr>
-      <td>Storage</td>
-      <td>TEAM TM8FP6 512GB NVMe SSD</td>
-      <td style="text-align: center;">✅</td>
-      <td>Fully supported (with power management) and fiixed random kernel panic by adding (forceRenderStandby=0) in boot-args</td>
-    </tr>
-  <!-- Ports -->
-    <tr>
-      <td>Ports</td>
-      <td>(Left)
-• 1x USB 3.0 Gen 2 Type-A<br>
-• 1x USB 3.0 Gen 2 Type-C<br>
-• 1x USB 2.0 Gen 2 Type-C<br>
-(Right)<br>• 1x USB 3.0 Gen 1 Type-A<br>
-• 1x 3.5 mm Audio combo jack<br>
-• 1x USB 3.0 Gen 2 Type-A<br>
-• 1x USB 2.0 Gen 2 Type-A<br>
-      <td style="text-align: center;">✅</td>
-      <td>Fully supported.</td>
-    </tr>
-  <!-- Battery and Power -->
-    <tr>
-      <td rowspan=2>Battery</td>
-      <td>Built-in Battery</td>
-      <td style="text-align: center;">✅</td>
-      <td>Fully supported (with power reading).</td>
-    </tr>
-    <tr>
-      <td>AC Power Adapter</td>
-      <td style="text-align: center;">✅</td>
-      <td>Fully supported (with hotplug and charge limit feature).</td>
-    </tr>
-  </tbody>
-</table>
+## Disclaimer
 
-
-### Software Features:
-<table>
-  <thead>
-    <tr>
-      <th>Type</th>
-      <th>Feature</th>
-      <th colspan=2>Status</th>
-    </tr>
-  </thead>
-  <tbody>
-  <!-- iServices -->
-    <tr>
-      <td colspan=2>iServices (iCloud)</td>
-      <td style="text-align: center;">✅</td>
-      <td>Fully supported.</td>
-    </tr>
-  <!-- Continuity -->
-    <tr>
-      <td rowspan=6>Continuity</td>
-      <td>Airplay to Mac</td>
-      <td style="text-align: center;">❌</td>
-      <td>Untested.</td>
-    <tr>
-      <td>Sidecar</td>
-      <td style="text-align: center;">❌</td>
-      <td>Untested.</td>
-    <tr>
-      <td>Handoff</td>
-      <td style="text-align: center;">❌</td>
-      <td>Untested.</td>
-    </tr>
-    <tr>
-      <td>Continuity Camera</td>
-      <td style="text-align: center;">✅</td>
-      <td>Supported.</td>
-    </tr>
-    <tr>
-      <td>Universal Clipboard</td>
-      <td style="text-align: center;">❌</td>
-      <td>Untested.</td>
-    </tr>
-    <tr>
-      <td>Universal Control</td>
-      <td style="text-align: center;">❌</td>
-      <td>Untested.</td>
-    </tr>
-  <!-- Sleep + Wake -->
-    <tr>
-      <td rowspan=2>Sleep / Wake</td>
-      <td>Sleep</td>
-      <td style="text-align: center;">✅</td>
-      <td>Supported.</td>
-    </tr>
-    <tr>
-      <td>Hibernation</td>
-      <td style="text-align: center;">✅</td>
-      <td>Supported.</td>
-    </tr>
-  <!-- Battery meter -->
-    <tr>
-      <td colspan=2>Battery Indication</td>
-      <td style="text-align: center;">✅</td>
-      <td>Fully supported.</td>
-    </tr>
-</table>
-
-## Installation Guide
-
-### BIOS Settings
-#### Disable
-* Secure boot
-* Disable wakeup on wlan and bluetooth (chipset > PCH IO > disable wake on wlan+bt)
-* Virtualization (VT-d > Advanced > cpu > virtualization technology)
-
-#### Enable
-* iGPU Memory `DVMT Pre-Allocated` to `64MB` or `MAX` (Advanced > System Agent (SA) Configuration > Graphics Configuration > DVMT Pre-Allocated)
-* Set `DVMT Total Gfx Mem` to `MAX` (Advanced > System Agent (SA) Configuration > Graphics Configuration > DVMT Total Gfx Mem)
-* Set `DVM Total Dfx Mem` to `256MB` or `MAX` (Advanced > System Agent (SA) Configuration > Graphics Configuration > DVM Total Dfx Mem)
-* Intel Virtualization Technology (Advanced > CPU Configuration > Intel Virtualization Technology)
-<br>
-<br>
-If those settings are not available in your BIOS, skip them and continue the installation.
-
-### Create USB Installer
-1. Download macOS Ventura from https://068fx-my.sharepoint.com/:f:/g/personal/ekopuryanto_068fx_onmicrosoft_com/EpzotHNX6yJOlCE-DJcATFMByyNJgirB_c5Ix7PGu1Fguw?e=0SB6Tv (Thanks for hackintosh lover Indonesia for providing the installer)
-2. Download from this repository
-3. Download flasher, you can use [Balena Etcher](https://www.balena.io/etcher/) or [TransMac](https://www.acutesystems.com/scrtm.htm)
-4. Flash the macOS Ventura to your USB Drive
-5. Mount the EFI partition of the USB Drive
-6. Copy the EFI folder from this repository to the EFI partition of the USB Drive
-7. Generate your own SMBIOS by using [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS)
-8. Copy the generated SMBIOS to the EFI partition of the USB Drive
-9. Boot from the USB Drive
-10. Install macOS Ventura
-11. After installation, boot from the USB Drive again
-12. Copy the EFI folder from the EFI partition of the USB Drive to the EFI partition of your SSD
-13. Reboot and enjoy
-
-### Dual booting with Windows
-1. Install macOS Ventura first
-2. Backup your EFI folder
-3. Install Windows
-4. Boot from the USB Drive
-5. Copy the EFI folder from the EFI partition of the USB Drive to the EFI partition of your SSD (if popup shows up, click replace)
-6. Reboot and enjoy
-
-### ⚠️ NOTE ⚠️
-This EFI is not recommended for daily use, because it's still in development stage. If you want to use it for daily use, you can use it at your own risk.
-I'm not responsible for any damage caused by this EFI.
-
-Also, remove the ACPI named [SSDT-RP09.PXSX-disable.aml](EFI%2FOC%2FACPI%2FSSDT-RP09.PXSX-disable.aml) because my 1st nvme slot are broken and caused kernel panic
-
-If not, you can't use your 1st nvme slot 😃
+Use this EFI at your own risk. I am not responsible for any damage it causes.
