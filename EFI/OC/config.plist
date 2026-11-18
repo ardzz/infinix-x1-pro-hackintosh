@@ -56,14 +56,6 @@
 			</dict>
 			<dict>
 				<key>Comment</key>
-				<string>SSDT-RP09.PXSX-disable.aml</string>
-				<key>Enabled</key>
-				<true/>
-				<key>Path</key>
-				<string>SSDT-RP09.PXSX-disable.aml</string>
-			</dict>
-			<dict>
-				<key>Comment</key>
 				<string>SSDT-RTCAWAC.aml</string>
 				<key>Enabled</key>
 				<true/>
@@ -93,6 +85,30 @@
 				<true/>
 				<key>Path</key>
 				<string>SSDT-XOSI.aml</string>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>SSDT-GPI0.aml - fallback: clear GPHD under Darwin so GPI0 is INT3455 (off by default)</string>
+				<key>Enabled</key>
+				<false/>
+				<key>Path</key>
+				<string>SSDT-GPI0.aml</string>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>SSDT-TPD0-GPIO.aml - fallback: TPD0 GpioInt pin 0x6D (needs TPD0 _CRS-&gt;XCRS; off by default)</string>
+				<key>Enabled</key>
+				<false/>
+				<key>Path</key>
+				<string>SSDT-TPD0-GPIO.aml</string>
+			</dict>
+			<dict>
+				<key>Comment</key>
+				<string>SSDT-TPD0-POLL.aml - fallback: TPD0 polling (needs TPD0 _CRS-&gt;XCRS; never with -GPIO)</string>
+				<key>Enabled</key>
+				<false/>
+				<key>Path</key>
+				<string>SSDT-TPD0-POLL.aml</string>
 			</dict>
 		</array>
 		<key>Delete</key>
@@ -181,6 +197,44 @@
 				<integer>0</integer>
 				<key>Comment</key>
 				<string>HPET _CRS to XCRS</string>
+				<key>Count</key>
+				<integer>1</integer>
+				<key>Enabled</key>
+				<false/>
+				<key>Find</key>
+				<data>
+				X0NSUw==
+				</data>
+				<key>Limit</key>
+				<integer>0</integer>
+				<key>Mask</key>
+				<data>
+				</data>
+				<key>OemTableId</key>
+				<data>
+				</data>
+				<key>Replace</key>
+				<data>
+				WENSUw==
+				</data>
+				<key>ReplaceMask</key>
+				<data>
+				</data>
+				<key>Skip</key>
+				<integer>0</integer>
+				<key>TableLength</key>
+				<integer>0</integer>
+				<key>TableSignature</key>
+				<data>
+				</data>
+			</dict>
+			<dict>
+				<key>Base</key>
+				<string>\_SB.PCI0.I2C0.TPD0</string>
+				<key>BaseSkip</key>
+				<integer>0</integer>
+				<key>Comment</key>
+				<string>TPD0 _CRS to XCRS (for SSDT-TPD0-GPIO or -POLL)</string>
 				<key>Count</key>
 				<integer>1</integer>
 				<key>Enabled</key>
@@ -358,7 +412,7 @@
 				</data>
 				<key>AAPL,ig-platform-id</key>
 				<data>
-				AQBcig==
+				AABSig==
 				</data>
 				<key>backlight-smoother-interval</key>
 				<data>
@@ -371,6 +425,10 @@
 				<key>backlight-smoother-threshold</key>
 				<data>
 				LAEAAA==
+				</data>
+				<key>dbuf-optimizer-delay</key>
+				<data>
+				AgAAAA==
 				</data>
 				<key>device-id</key>
 				<data>
@@ -437,7 +495,7 @@
 				AQAAAA==
 				</data>
 				<key>model</key>
-				<string>Nvidia RTX 3050 Ti</string>
+				<string>Intel Iris Plus Graphics G7 (Ice Lake)</string>
 				<key>rps-control</key>
 				<data>
 				AQAAAA==
@@ -464,13 +522,13 @@
 				<key>Arch</key>
 				<string>Any</string>
 				<key>BundlePath</key>
-				<string>IntelBluetoothFirmware.kext</string>
+				<string>Lilu.kext</string>
 				<key>Comment</key>
-				<string>IntelBluetoothFirmware.kext</string>
+				<string>Lilu.kext</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
-				<string>Contents/MacOS/IntelBluetoothFirmware</string>
+				<string>Contents/MacOS/Lilu</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -480,15 +538,51 @@
 			</dict>
 			<dict>
 				<key>Arch</key>
+				<string>x86_64</string>
+				<key>BundlePath</key>
+				<string>AirportItlwm.kext</string>
+				<key>Comment</key>
+				<string>AirportItlwm-Sequoia 2.4.0-alpha 7204c69 (laobamac/itlwm) - native Wi-Fi</string>
+				<key>Enabled</key>
+				<false/>
+				<key>ExecutablePath</key>
+				<string>Contents/MacOS/AirportItlwm</string>
+				<key>MaxKernel</key>
+				<string>24.99.99</string>
+				<key>MinKernel</key>
+				<string>24.2.0</string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+			</dict>
+			<dict>
+				<key>Arch</key>
+				<string>x86_64</string>
+				<key>BundlePath</key>
+				<string>itlwm.kext</string>
+				<key>Comment</key>
+				<string>itlwm 2.3.0 fallback - NEVER enable together with AirportItlwm</string>
+				<key>Enabled</key>
+				<false/>
+				<key>ExecutablePath</key>
+				<string>Contents/MacOS/itlwm</string>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
+				<string>24.0.0</string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+			</dict>
+			<dict>
+				<key>Arch</key>
 				<string>Any</string>
 				<key>BundlePath</key>
-				<string>Lilu.kext</string>
+				<string>IntelBluetoothFirmware.kext</string>
 				<key>Comment</key>
-				<string>Lilu.kext</string>
+				<string>IntelBluetoothFirmware.kext</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
-				<string>Contents/MacOS/Lilu</string>
+				<string>Contents/MacOS/IntelBluetoothFirmware</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -538,7 +632,7 @@
 				<key>BundlePath</key>
 				<string>UTBMap.kext</string>
 				<key>Comment</key>
-				<string>UTBMap.kext</string>
+				<string>USB map (plug-tested 2026-11-17)</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
@@ -684,7 +778,7 @@
 				<key>Comment</key>
 				<string>VoodooGPIO.kext</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooGPIO</string>
 				<key>MaxKernel</key>
@@ -702,7 +796,7 @@
 				<key>Comment</key>
 				<string>VoodooI2CServices.kext</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooI2CServices</string>
 				<key>MaxKernel</key>
@@ -752,6 +846,42 @@
 				<key>Arch</key>
 				<string>Any</string>
 				<key>BundlePath</key>
+				<string>BTLEAdvFixup.kext</string>
+				<key>Comment</key>
+				<string>ForbiddenItlwm BT LE adv (enable for AirDrop on 15.8.x)</string>
+				<key>Enabled</key>
+				<true/>
+				<key>ExecutablePath</key>
+				<string>Contents/MacOS/BTLEAdvFixup</string>
+				<key>MaxKernel</key>
+				<string>24.99.99</string>
+				<key>MinKernel</key>
+				<string>24.0.0</string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+			</dict>
+			<dict>
+				<key>Arch</key>
+				<string>Any</string>
+				<key>BundlePath</key>
+				<string>ForbiddenItlwm.kext</string>
+				<key>Comment</key>
+				<string>AirDrop-capable Intel WiFi 0.6.0-beta.1 (enable on 15.8.x, disable AirportItlwm+IntelBTPatcher)</string>
+				<key>Enabled</key>
+				<true/>
+				<key>ExecutablePath</key>
+				<string>Contents/MacOS/ForbiddenItlwm</string>
+				<key>MaxKernel</key>
+				<string>24.99.99</string>
+				<key>MinKernel</key>
+				<string>24.0.0</string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+			</dict>
+			<dict>
+				<key>Arch</key>
+				<string>Any</string>
+				<key>BundlePath</key>
 				<string>BrightnessKeys.kext</string>
 				<key>Comment</key>
 				<string>BrightnessKeys.kext</string>
@@ -777,24 +907,6 @@
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/ECEnabler</string>
-				<key>MaxKernel</key>
-				<string></string>
-				<key>MinKernel</key>
-				<string></string>
-				<key>PlistPath</key>
-				<string>Contents/Info.plist</string>
-			</dict>
-			<dict>
-				<key>Arch</key>
-				<string>Any</string>
-				<key>BundlePath</key>
-				<string>IntelBTPatcher.kext</string>
-				<key>Comment</key>
-				<string>IntelBTPatcher.kext</string>
-				<key>Enabled</key>
-				<true/>
-				<key>ExecutablePath</key>
-				<string>Contents/MacOS/IntelBTPatcher</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
@@ -864,7 +976,7 @@
 				<key>Comment</key>
 				<string>VoodooI2C.kext</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooI2C</string>
 				<key>MaxKernel</key>
@@ -882,6 +994,78 @@
 				<key>Comment</key>
 				<string>VoodooI2CHID.kext</string>
 				<key>Enabled</key>
+				<false/>
+				<key>ExecutablePath</key>
+				<string>Contents/MacOS/VoodooI2CHID</string>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
+				<string></string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+			</dict>
+			<dict>
+				<key>Arch</key>
+				<string>Any</string>
+				<key>BundlePath</key>
+				<string>VoodooI2C-2.6.5.kext/Contents/PlugIns/VoodooGPIO.kext</string>
+				<key>Comment</key>
+				<string>VoodooI2C 2.6.5 set (active; 2.9.1 attaches but the touchpad stays dead) - see tools/touchpad-mode.sh</string>
+				<key>Enabled</key>
+				<true/>
+				<key>ExecutablePath</key>
+				<string>Contents/MacOS/VoodooGPIO</string>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
+				<string></string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+			</dict>
+			<dict>
+				<key>Arch</key>
+				<string>Any</string>
+				<key>BundlePath</key>
+				<string>VoodooI2C-2.6.5.kext/Contents/PlugIns/VoodooI2CServices.kext</string>
+				<key>Comment</key>
+				<string>VoodooI2C 2.6.5 set (active; 2.9.1 attaches but the touchpad stays dead) - see tools/touchpad-mode.sh</string>
+				<key>Enabled</key>
+				<true/>
+				<key>ExecutablePath</key>
+				<string>Contents/MacOS/VoodooI2CServices</string>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
+				<string></string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+			</dict>
+			<dict>
+				<key>Arch</key>
+				<string>Any</string>
+				<key>BundlePath</key>
+				<string>VoodooI2C-2.6.5.kext</string>
+				<key>Comment</key>
+				<string>VoodooI2C 2.6.5 set (active; 2.9.1 attaches but the touchpad stays dead) - see tools/touchpad-mode.sh</string>
+				<key>Enabled</key>
+				<true/>
+				<key>ExecutablePath</key>
+				<string>Contents/MacOS/VoodooI2C</string>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
+				<string></string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+			</dict>
+			<dict>
+				<key>Arch</key>
+				<string>Any</string>
+				<key>BundlePath</key>
+				<string>VoodooI2CHID-2.6.5.kext</string>
+				<key>Comment</key>
+				<string>VoodooI2C 2.6.5 set (active; 2.9.1 attaches but the touchpad stays dead) - see tools/touchpad-mode.sh</string>
+				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/VoodooI2CHID</string>
@@ -896,35 +1080,17 @@
 				<key>Arch</key>
 				<string>Any</string>
 				<key>BundlePath</key>
-				<string>AirportItlwm.kext</string>
+				<string>IntelBTPatcher.kext</string>
 				<key>Comment</key>
-				<string>AirportItlwm.kext</string>
+				<string>Intel Bluetooth Patcher</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
-				<string>Contents/MacOS/AirportItlwm</string>
-				<key>MaxKernel</key>
-				<string>23.99.99</string>
-				<key>MinKernel</key>
-				<string></string>
-				<key>PlistPath</key>
-				<string>Contents/Info.plist</string>
-			</dict>
-			<dict>
-				<key>Arch</key>
-				<string>Any</string>
-				<key>BundlePath</key>
-				<string>itlwm.kext</string>
-				<key>Comment</key>
-				<string>Intel WiFi (for Sequoia)</string>
-				<key>Enabled</key>
-				<true/>
-				<key>ExecutablePath</key>
-				<string>Contents/MacOS/itlwm</string>
+				<string>Contents/MacOS/IntelBTPatcher</string>
 				<key>MaxKernel</key>
 				<string></string>
 				<key>MinKernel</key>
-				<string>24.0.0</string>
+				<string></string>
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 			</dict>
@@ -998,7 +1164,7 @@
 				<key>Count</key>
 				<integer>1</integer>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>Find</key>
 				<data>
 				</data>
@@ -1393,7 +1559,7 @@
 			<key>ThirdPartyDrives</key>
 			<false/>
 			<key>XhciPortLimit</key>
-			<true/>
+			<false/>
 		</dict>
 		<key>Scheme</key>
 		<dict>
@@ -1432,11 +1598,11 @@
 			<key>PickerAudioAssist</key>
 			<false/>
 			<key>PickerMode</key>
-			<string>External</string>
+			<string>Builtin</string>
 			<key>PickerVariant</key>
-			<string>chris1111\Block3D</string>
+			<string>Auto</string>
 			<key>PollAppleHotKeys</key>
-			<true/>
+			<false/>
 			<key>ShowPicker</key>
 			<true/>
 			<key>TakeoffDelay</key>
@@ -1447,21 +1613,21 @@
 		<key>Debug</key>
 		<dict>
 			<key>AppleDebug</key>
-			<false/>
+			<true/>
 			<key>ApplePanic</key>
-			<false/>
+			<true/>
 			<key>DisableWatchDog</key>
 			<true/>
 			<key>DisplayDelay</key>
 			<integer>0</integer>
 			<key>DisplayLevel</key>
-			<integer>2147483650</integer>
+			<integer>2147483714</integer>
 			<key>LogModules</key>
 			<string>*</string>
 			<key>SysReport</key>
 			<false/>
 			<key>Target</key>
-			<integer>0</integer>
+			<integer>21</integer>
 		</dict>
 		<key>Entries</key>
 		<array>
@@ -1524,28 +1690,6 @@
 		</dict>
 		<key>Tools</key>
 		<array>
-			<dict>
-				<key>Arguments</key>
-				<string></string>
-				<key>Auxiliary</key>
-				<true/>
-				<key>Comment</key>
-				<string>acpidump.efi</string>
-				<key>Enabled</key>
-				<true/>
-				<key>Flavour</key>
-				<string>Auto</string>
-				<key>FullNvramAccess</key>
-				<false/>
-				<key>Name</key>
-				<string>acpidump.efi</string>
-				<key>Path</key>
-				<string>acpidump.efi</string>
-				<key>RealPath</key>
-				<false/>
-				<key>TextMode</key>
-				<false/>
-			</dict>
 			<dict>
 				<key>Arguments</key>
 				<string></string>
@@ -1883,16 +2027,8 @@
 				<data>
 				Rg==
 				</data>
-				<key>bluetoothExternalDongleFailed</key>
-				<data>
-				AA==
-				</data>
-				<key>bluetoothinternalControllerInfo</key>
-				<data>
-				AAAAAAAAAAAAAAAAAAA=
-				</data>
 				<key>boot-args</key>
-				<string>alcid=16 forceRenderStandby=0 keepsyms=1 swd_panic=1 -igfxcdc -igfxdvmt igfxonln=1 -igfxblr igfxfw=2 -igfxdbeo  -noDC9 agdpmod=vit9696</string>
+				<string>-v keepsyms=1 swd_panic=1 -igfxcdc -igfxdvmt igfxonln=1 -igfxblr igfxfw=2 -igfxdbeo -wegnoegpu agdpmod=vit9696 -noDC9 debug=0x100 forceRenderStandby=0 alcid=16 -btleadv -itlawdlcoexprobe -itlawdliface -itlawdlnativeup -itlawdlcoexrx -itlawdlcoextx -itlawdlcoexmulti -itlawdlcoexdata -itlawdlmitx -itlawdlelicit -itlawdlcaps -itlawdlsvcmerge -itlawdlawsync itlawdlintcoal=4 -itlawdlcoexbatx -itlawdlcoexpeerpause -itlawdlcoexbatrace itlawdltxqueue=4096 -nodisplaysleepDC6</string>
 				<key>csr-active-config</key>
 				<data>
 				AAAAAA==
@@ -1918,6 +2054,7 @@
 			<array>
 				<string>boot-args</string>
 				<string>ForceDisplayRotationInEFI</string>
+				<string>csr-active-config</string>
 			</array>
 		</dict>
 		<key>LegacyOverwrite</key>
@@ -2046,11 +2183,11 @@
 			<key>AudioCodec</key>
 			<integer>0</integer>
 			<key>AudioDevice</key>
-			<string>PciRoot(0x0)/Pci(0x1F,0x3)</string>
+			<string>PciRoot(0x0)/Pci(0x1b,0x0)</string>
 			<key>AudioOutMask</key>
 			<integer>1</integer>
 			<key>AudioSupport</key>
-			<true/>
+			<false/>
 			<key>DisconnectHda</key>
 			<false/>
 			<key>MaximumGain</key>
@@ -2060,7 +2197,7 @@
 			<key>MinimumAudibleGain</key>
 			<integer>-55</integer>
 			<key>PlayChime</key>
-			<string>Enabled</string>
+			<string>Auto</string>
 			<key>ResetTrafficClass</key>
 			<false/>
 			<key>SetupDelay</key>
@@ -2074,21 +2211,11 @@
 				<key>Arguments</key>
 				<string></string>
 				<key>Comment</key>
-				<string>AudioDxe.efi</string>
-				<key>Enabled</key>
-				<true/>
-				<key>LoadEarly</key>
-				<false/>
-				<key>Path</key>
-				<string>AudioDxe.efi</string>
-			</dict>
-			<dict>
-				<key>Arguments</key>
-				<string></string>
-				<key>Comment</key>
 				<string>HfsPlus.efi</string>
 				<key>Enabled</key>
 				<true/>
+				<key>HideVerbose</key>
+				<false/>
 				<key>LoadEarly</key>
 				<false/>
 				<key>Path</key>
@@ -2098,49 +2225,15 @@
 				<key>Arguments</key>
 				<string></string>
 				<key>Comment</key>
-				<string>OpenCanopy.efi</string>
-				<key>Enabled</key>
-				<true/>
-				<key>LoadEarly</key>
-				<false/>
-				<key>Path</key>
-				<string>OpenCanopy.efi</string>
-			</dict>
-			<dict>
-				<key>Arguments</key>
-				<string></string>
-				<key>Comment</key>
 				<string>OpenRuntime.efi</string>
 				<key>Enabled</key>
 				<true/>
+				<key>HideVerbose</key>
+				<false/>
 				<key>LoadEarly</key>
 				<false/>
 				<key>Path</key>
 				<string>OpenRuntime.efi</string>
-			</dict>
-			<dict>
-				<key>Arguments</key>
-				<string></string>
-				<key>Comment</key>
-				<string>ResetNvramEntry.efi</string>
-				<key>Enabled</key>
-				<true/>
-				<key>LoadEarly</key>
-				<false/>
-				<key>Path</key>
-				<string>ResetNvramEntry.efi</string>
-			</dict>
-			<dict>
-				<key>Arguments</key>
-				<string></string>
-				<key>Comment</key>
-				<string>ToggleSipEntry.efi</string>
-				<key>Enabled</key>
-				<true/>
-				<key>LoadEarly</key>
-				<false/>
-				<key>Path</key>
-				<string>ToggleSipEntry.efi</string>
 			</dict>
 		</array>
 		<key>Input</key>
