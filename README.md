@@ -35,7 +35,7 @@ System sleep (S3) does **not** work yet; see [Sleep and power](#sleep-and-power)
 | Lilu | 1.7.2 | |
 | VirtualSMC (+ SMCBatteryManager, SMCProcessor, SMCSuperIO) | 1.3.8 | |
 | WhateverGreen | 1.7.1 | See [Graphics fix](#graphics-fix-ice-lake-screen-corruption) |
-| AppleALC | 1.9.8 | `alcid=16` |
+| AppleALC | 1.9.8 | `alcid=16`, `alcverbs=1` |
 | VoodooPS2Controller | 2.3.7 | Keyboard |
 | VoodooI2C / VoodooI2CHID | **2.6.5** | 2.9.1 is included but disabled: it attaches, but the touchpad stays dead |
 | USBToolBox + UTBMap | 1.2.0 | Plug-tested map, `XhciPortLimit` off |
@@ -61,6 +61,7 @@ SMBIOS: `MacBookAir9,1`. `SecureBootModel` is `Disabled`.
 | Keyboard | ✅ | VoodooPS2 |
 | Touchpad (SYNA3602) | ✅ | VoodooI2C 2.6.5 |
 | Speakers | ✅ | `alcid=16` |
+| Headphone jack | ✅ | Needs the [headphone fix](#headphone-jack) in `tools/audio/` |
 | Built-in microphone | ❓ | Not tested on Sequoia. It did not work on Ventura |
 | Wi-Fi (AX201) | ✅ | ForbiddenItlwm |
 | Bluetooth (AX201) | ✅ | IntelBluetoothFirmware + BlueToolFixup |
@@ -209,11 +210,42 @@ This sets `displaysleep 10`, `sleep 0`, `disablesleep 1`, turns hibernation off,
 ## Boot arguments
 
 ```
--v keepsyms=1 swd_panic=1 -igfxcdc -igfxdvmt igfxonln=1 -igfxblr igfxfw=2 -igfxdbeo -wegnoegpu agdpmod=vit9696 -noDC9 debug=0x100 forceRenderStandby=0 alcid=16 -nodisplaysleepDC6
+-v keepsyms=1 swd_panic=1 -igfxcdc -igfxdvmt igfxonln=1 -igfxblr igfxfw=2 -igfxdbeo -wegnoegpu agdpmod=vit9696 -noDC9 debug=0x100 forceRenderStandby=0 -nodisplaysleepDC6 alcid=16 alcverbs=1
 ```
 plus the ForbiddenItlwm AWDL flags (`-btleadv … itlawdltxqueue=4096`).
 
-`-v` (verbose boot) and `debug=0x100` are there for debugging. Remove them for daily use.
+`-v` (verbose boot) and `debug=0x100` are there for debugging. Remove them for daily use. Keep `alcverbs=1`: the [headphone fix](#headphone-jack) needs it.
+
+## Headphone jack
+
+With `alcid=16`, the speakers work and the headphone jack is detected and routed (macOS switches the output to Headphones, pin `0x21` is unmuted and DAC `0x03` streams), but the headphones are silent.
+
+The cause is a Realtek vendor coefficient. Coefficient `0x04` reads `0x9027`. Bit 11 ("power up output pin") is not set, so the headphone output stays powered down. Linux sets this bit for every ALC269VB (`alc269vb_toggle_power_output` in the kernel's Realtek HDA driver). Writing `0x9827` makes the headphones play at once. The value survives codec idle (D3).
+
+Other layouts do not help: `alcid=26` keeps the speakers but the jack stays silent, and `alcid=99` loses both.
+
+`tools/audio/` installs a LaunchDaemon that sets the bit at boot and checks it every 60 seconds. When the bit is already set, it does nothing. The daemon uses AppleALC's `alc-verb` tool, which needs the `alcverbs=1` boot-arg (already in the config).
+
+Install:
+1. Download the [AppleALC 1.9.8](https://github.com/acidanthera/AppleALC/releases/tag/1.9.8) RELEASE zip and copy `alc-verb` from it into `tools/audio/`, next to `install-hpfix.sh`.
+2. Run:
+   ```sh
+   cd tools/audio
+   sudo bash install-hpfix.sh
+   ```
+
+Verify:
+```sh
+cat /var/log/alc269vb-hpfix.log          # one line per change, e.g. "coef04 0x9027 -> 0x9827"
+sudo /usr/local/libexec/alc-verb 0x20 SET_COEF_INDEX 0x04
+sudo /usr/local/libexec/alc-verb 0x20 GET_PROC_COEF 0  # expect 0x9827
+```
+
+Uninstall:
+```sh
+sudo launchctl bootout system/com.infinix.alc269vb-hpfix
+sudo rm /Library/LaunchDaemons/com.infinix.alc269vb-hpfix.plist /usr/local/libexec/alc269vb-hpfix.sh /usr/local/libexec/alc-verb
+```
 
 ## Debugging and boot speed
 
@@ -243,7 +275,7 @@ The published config uses VoodooI2C/VoodooI2CHID **2.6.5** with the stock DSDT `
 
 ## Tools
 
-All shell scripts in [`tools/`](tools) change `config.plist` on a mounted ESP. Run them on macOS with `sudo`. Each script describes its usage in its header.
+The shell scripts in [`tools/`](tools) run on macOS with `sudo`, except `watch-ports.sh`. Most of them change `config.plist` on a mounted ESP. Each script describes its usage in its header.
 
 | Script | Purpose |
 |---|---|
@@ -253,6 +285,7 @@ All shell scripts in [`tools/`](tools) change `config.plist` on a mounted ESP. R
 | `touchpad-mode.sh <mode> <config>` | Switch the VoodooI2C version and touchpad SSDTs |
 | `watch-ports.sh` | USB port watcher (runs under **Linux**) |
 | `build_utbmap.py` | Generate `UTBMap.kext` (any OS, Python 3) |
+| `audio/install-hpfix.sh` | Install the [headphone fix](#headphone-jack) LaunchDaemon |
 
 ---
 
