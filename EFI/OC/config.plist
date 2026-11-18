@@ -2028,7 +2028,7 @@
 				Rg==
 				</data>
 				<key>boot-args</key>
-				<string>-v keepsyms=1 swd_panic=1 -igfxcdc -igfxdvmt igfxonln=1 -igfxblr igfxfw=2 -igfxdbeo -wegnoegpu agdpmod=vit9696 -noDC9 debug=0x100 forceRenderStandby=0 alcid=16 -btleadv -itlawdlcoexprobe -itlawdliface -itlawdlnativeup -itlawdlcoexrx -itlawdlcoextx -itlawdlcoexmulti -itlawdlcoexdata -itlawdlmitx -itlawdlelicit -itlawdlcaps -itlawdlsvcmerge -itlawdlawsync itlawdlintcoal=4 -itlawdlcoexbatx -itlawdlcoexpeerpause -itlawdlcoexbatrace itlawdltxqueue=4096 -nodisplaysleepDC6</string>
+				<string>-v keepsyms=1 swd_panic=1 -igfxcdc -igfxdvmt igfxonln=1 -igfxblr igfxfw=2 -igfxdbeo -wegnoegpu agdpmod=vit9696 -noDC9 debug=0x100 forceRenderStandby=0 -btleadv -itlawdlcoexprobe -itlawdliface -itlawdlnativeup -itlawdlcoexrx -itlawdlcoextx -itlawdlcoexmulti -itlawdlcoexdata -itlawdlmitx -itlawdlelicit -itlawdlcaps -itlawdlsvcmerge -itlawdlawsync itlawdlintcoal=4 -itlawdlcoexbatx -itlawdlcoexpeerpause -itlawdlcoexbatrace itlawdltxqueue=4096 -nodisplaysleepDC6 alcid=16 alcverbs=1</string>
 				<key>csr-active-config</key>
 				<data>
 				AAAAAA==
